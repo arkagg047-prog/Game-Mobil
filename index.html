@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Mobil</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background:#222;
+overflow:hidden;
+}
+
+#game{
+position:relative;
+width:350px;
+height:600px;
+background:#555;
+overflow:hidden;
+border:5px solid white;
+}
+
+.line{
+position:absolute;
+width:10px;
+height:80px;
+background:white;
+left:170px;
+}
+
+#player{
+position:absolute;
+width:60px;
+height:100px;
+background:red;
+bottom:20px;
+left:145px;
+border-radius:10px;
+box-shadow:0 0 15px red;
+}
+
+.enemy{
+position:absolute;
+width:60px;
+height:100px;
+background:cyan;
+border-radius:10px;
+box-shadow:0 0 15px cyan;
+}
+
+#score{
+position:absolute;
+top:10px;
+left:10px;
+color:white;
+font-size:20px;
+font-weight:bold;
+z-index:99;
+}
+
+#gameover{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+color:white;
+font-size:30px;
+display:none;
+text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div id="game">
+<div id="score">Skor : 0</div>
+<div id="gameover">
+GAME OVER<br>
+Refresh untuk bermain lagi
+</div>
+
+<div id="player"></div>
+
+</div>
+
+<script>
+const game=document.getElementById("game");
+const player=document.getElementById("player");
+const scoreText=document.getElementById("score");
+const over=document.getElementById("gameover");
+
+let playerX=145;
+let score=0;
+let running=true;
+
+for(let i=0;i<8;i++){
+let line=document.createElement("div");
+line.className="line";
+line.style.top=(i*90)+"px";
+game.appendChild(line);
+}
+
+let enemies=[];
+
+function spawnEnemy(){
+if(!running)return;
+
+let enemy=document.createElement("div");
+enemy.className="enemy";
+
+let lane=[40,145,250];
+enemy.style.left=lane[Math.floor(Math.random()*3)]+"px";
+enemy.style.top="-100px";
+
+game.appendChild(enemy);
+enemies.push(enemy);
+}
+
+setInterval(spawnEnemy,900);
+
+document.addEventListener("keydown",e=>{
+if(!running)return;
+
+if(e.key=="ArrowLeft"){
+playerX-=105;
+if(playerX<40)playerX=40;
+}
+
+if(e.key=="ArrowRight"){
+playerX+=105;
+if(playerX>250)playerX=250;
+}
+
+player.style.left=playerX+"px";
+});
+
+function loop(){
+
+if(!running)return;
+
+document.querySelectorAll(".line").forEach(line=>{
+line.style.top=(line.offsetTop+8)+"px";
+if(line.offsetTop>600){
+line.style.top="-80px";
+}
+});
+
+enemies.forEach((enemy,index)=>{
+
+enemy.style.top=(enemy.offsetTop+7)+"px";
+
+if(enemy.offsetTop>650){
+enemy.remove();
+enemies.splice(index,1);
+score++;
+scoreText.innerHTML="Skor : "+score;
+}
+
+let px=player.offsetLeft;
+let py=player.offsetTop;
+
+let ex=enemy.offsetLeft;
+let ey=enemy.offsetTop;
+
+if(
+px<ex+60 &&
+px+60>ex &&
+py<ey+100 &&
+py+100>ey
+){
+running=false;
+over.style.display="block";
+}
+});
+
+requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+
+</body>
+</html>
+<div id="level">Level : 1</div>
+<div id="coin">🪙 0</div>
+
+<div id="controls">
+    <button id="left">◀</button>
+    <button id="right">▶</button>
+</div>
